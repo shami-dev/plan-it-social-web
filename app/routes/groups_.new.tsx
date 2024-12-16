@@ -59,7 +59,8 @@ export async function action({ request }: ActionFunctionArgs) {
   if (groupImage && groupImage instanceof File && groupImage.name) {
     // Create a single supabase client for interacting with your database
     if (!process.env.SUPABASE_SECRET) throw new Error('SUPABASE_SECRET is not defined');
-    const supabase = createClient('https://fzzehiiwadkmbvpouotf.supabase.co', process.env.SUPABASE_SECRET);
+    if (!process.env.SUPABASE_URL) throw new Error('SUPABASE_URL is not defined');
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET);
     const uuid = crypto.randomUUID();
     try {
       const { data, error } = await supabase.storage
@@ -68,7 +69,7 @@ export async function action({ request }: ActionFunctionArgs) {
           cacheControl: '3600',
           upsert: false,
         });
-      groupImageUrl = `https://fzzehiiwadkmbvpouotf.supabase.co/storage/v1/object/public/group-cover-images/${data?.path}`;
+      groupImageUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/group-cover-images/${data?.path}`;
       if (error) {
         return { error: { message: `Error uploading image: ${error.message}` } };
       }
